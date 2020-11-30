@@ -12,7 +12,19 @@ public class Player : MonoBehaviour
     private float maximumCameraRotation = 90f;
     [SerializeField]
     private Camera cam;
+    [SerializeField]
+    private float itemPickUpDistance = 5f;
+    [SerializeField]
+    private float tearPickUpDistance = 2f;
+    [SerializeField]
+    private float force = 3;
+    [SerializeField]
+    private Transform itemCollectionLocation;
+    
     private Rigidbody rb;
+    private GameObject item;
+
+    private bool hasJumped = true;
 
     private void Start()
     {
@@ -23,7 +35,9 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        Move();
+        if (GameManager.canMove)
+            Move();
+        ItemCollection();
     }
 
     private void Move()
@@ -41,6 +55,12 @@ public class Player : MonoBehaviour
         velocity = velocity.normalized * speed;
 
         rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
+        
+        if (Input.GetKeyDown(KeyCode.Space) && !hasJumped)
+        {
+            rb.AddForce(Vector3.up * force, ForceMode.Impulse);
+            hasJumped = true;
+        }
         PlayerRotate();
     }
 
@@ -68,4 +88,30 @@ public class Player : MonoBehaviour
         cam.transform.localEulerAngles = new Vector3(currentX, 0f, 0f);
     }
 
+    private void ItemCollection()
+    {
+        // for now I am goig to leave this here for something else later if i wanted to have sort of an item collection puzzle. 
+        RaycastHit hit;
+
+        LayerMask mask = LayerMask.GetMask("Items");
+        // when the player is close enough to select an item, the player will click D to collect
+        // TODO: make an UI where there will be a small pop up text to hint the player to click D to collect item
+        if (Physics.Raycast(transform.position, cam.transform.forward, out hit, itemPickUpDistance, mask) && Input.GetMouseButtonDown(0))
+        {
+            //Debug.Log($"{hit.collider.tag} has been hit");
+            item = hit.collider.gameObject;
+            item.transform.SetParent(itemCollectionLocation);
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            item.transform.parent = null;
+        }
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.tag == "Ground")
+        {
+            hasJumped = false;
+        }
+    }
 }
