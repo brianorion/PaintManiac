@@ -111,4 +111,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hasFinishedPuzzle: 0
-  numberOfJumps: 23
+  numberOfJumps: 30
