@@ -9,6 +9,7 @@ TagManager:
   - Tear
   - Ground
   - Crate
+  - MovingWall
   layers:
   - Default
   - TransparentFX

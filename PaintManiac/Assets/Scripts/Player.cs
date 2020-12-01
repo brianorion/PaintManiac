@@ -23,8 +23,10 @@ public class Player : MonoBehaviour
     
     private Rigidbody rb;
     private GameObject item;
-
+    private JumpPuzzle jumpPuzzle;
     private bool hasJumped = true;
+    private int jumpCount = 0;
+    private bool obtainedJumpy = false;
 
     private void Start()
     {
@@ -55,11 +57,28 @@ public class Player : MonoBehaviour
         velocity = velocity.normalized * speed;
 
         rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
-        
-        if (Input.GetKeyDown(KeyCode.Space) && !hasJumped)
+        if (!obtainedJumpy)
         {
-            rb.AddForce(Vector3.up * force, ForceMode.Impulse);
-            hasJumped = true;
+            if (Input.GetKeyDown(KeyCode.Space) && !hasJumped)
+            {
+                rb.AddForce(Vector3.up * force, ForceMode.Impulse);
+                hasJumped = true;
+                jumpCount = 1;
+            }
+        }
+        else
+        {
+            if (Input.GetKeyDown(KeyCode.Space) && jumpCount < jumpPuzzle.numberOfJumps)
+            {
+                rb.AddForce(Vector3.up * force, ForceMode.Impulse);
+                hasJumped = true;
+                jumpCount++;
+            }
+            else
+            {
+                // we need to reset this because after jumping a set amount we lost the jumpy ability.
+                obtainedJumpy = false;
+            }
         }
         PlayerRotate();
     }
@@ -104,14 +123,29 @@ public class Player : MonoBehaviour
         }
         else if (Input.GetMouseButtonUp(0))
         {
-            item.transform.parent = null;
+            if (item != null)
+            {
+                item.transform.parent = null;
+                item = null;
+            }
+        }
+
+        if (item != null)
+        {
+            // if we have the smallbox selected that has the Jumpy script 
+            jumpPuzzle = item.GetComponent<JumpPuzzle>();
+            if (jumpPuzzle != null)
+            {
+                obtainedJumpy = true;
+            }
         }
     }
-    private void OnCollisionEnter(Collision collision)
+    private void OnCollisionStay(Collision collision)
     {
         if (collision.collider.tag == "Ground")
         {
             hasJumped = false;
+            jumpCount = 0;
         }
     }
 }

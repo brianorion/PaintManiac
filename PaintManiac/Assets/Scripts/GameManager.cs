@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,8 +12,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float timeTillDeath = 3f;
 
-    public static bool changedLevel = false;
+    public static bool changeLevel = false;
     public static bool canMove = true;
+    public static bool playerHasDied = false;
 
     public static int score = 0;
     public static int hitPoints = 3;
@@ -28,10 +30,15 @@ public class GameManager : MonoBehaviour
     }
     private void Update()
     {
-        if (changedLevel)
-            ResetVariables();
         PlayerUpdate();
         GameOver();
+        if (changeLevel)
+        {                                                                                                                   
+            ResetVariables();
+            StartCoroutine(ChangeScene());
+        }
+        Debug.Log($"Change level state: {changeLevel}");
+
     }
 
     private void PlayerUpdate()
@@ -44,6 +51,7 @@ public class GameManager : MonoBehaviour
             if (playerDepth <= -minimumDepthTillDeath)
             {
                 Destroy(instantiatedPlayer, timeTillDeath);
+                playerHasDied = true;
             }
         }
         // if it has been destroyed
@@ -52,13 +60,13 @@ public class GameManager : MonoBehaviour
             hitPoints -= 1;
             canMove = true;
             instantiatedPlayer = Instantiate(player, spawnLocation, Quaternion.identity);
+            playerHasDied = false;
         }
     }
 
     private void ResetVariables()
     {
         // these are variables that resets when changing levels
-        changedLevel = false;
         spawnLocation = Vector3.zero;
         hitPoints = 3;
         canMove = true;
@@ -76,6 +84,26 @@ public class GameManager : MonoBehaviour
             // there should be an UI that prompts the player to either restart or go to main menu
 
             Debug.Log("Game Over");
+        }
+    }
+
+    private IEnumerator ChangeScene()
+    {
+        if (changeLevel)
+        {
+            Scene currentScene = SceneManager.GetActiveScene();
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(currentScene.buildIndex + 1, LoadSceneMode.Single);
+
+            Debug.Log("I am changing scenes");
+
+            while (!asyncLoad.isDone)
+            {
+                yield return null;
+            }
+            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetSceneByBuildIndex(currentScene.buildIndex + 1));
+            SceneManager.UnloadSceneAsync(currentScene);
+            // we changed the level
+            changeLevel = false;
         }
     }
 }

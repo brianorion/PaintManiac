@@ -7,10 +7,11 @@ public class Goal : MonoBehaviour
 {
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.tag == "player")
+        if (collision.collider.tag == "Player")
         {
             // we are going to switch to the next level
-            GameManager.changedLevel = true;
+            GameManager.changeLevel = true;
+            Debug.Log($"Finished Level: {GameManager.changeLevel}");
         }
     }
 }
