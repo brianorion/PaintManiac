@@ -37,7 +37,6 @@ public class GameManager : MonoBehaviour
             ResetVariables();
             StartCoroutine(ChangeScene());
         }
-        Debug.Log($"Change level state: {changeLevel}");
 
     }
 
