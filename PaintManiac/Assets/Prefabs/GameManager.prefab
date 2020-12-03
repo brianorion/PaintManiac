@@ -51,5 +51,9 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  pauseMenu: {fileID: 0}
+  resume: {fileID: 0}
+  restartLevel: {fileID: 0}
+  quit: {fileID: 0}
+  score: 1000
+  scoreDecrement: 1

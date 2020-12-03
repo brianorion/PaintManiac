@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class Player : MonoBehaviour
 {
@@ -15,12 +16,10 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float itemPickUpDistance = 5f;
     [SerializeField]
-    private float tearPickUpDistance = 2f;
-    [SerializeField]
     private float force = 3;
     [SerializeField]
     private Transform itemCollectionLocation;
-    
+
     private Rigidbody rb;
     private Rigidbody itemRB;
     private GameObject item;
@@ -39,7 +38,9 @@ public class Player : MonoBehaviour
     private void Update()
     {
         if (GameManager.canMove)
+        {
             Move();
+        }
         ItemCollection();
     }
 

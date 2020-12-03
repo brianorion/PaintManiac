@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using System.IO;
 using System.Text;
 using UnityEngine.UI;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -25,20 +26,34 @@ public class GameManager : MonoBehaviour
     private Button restartLevel;
     [SerializeField]
     private Button quit;
+    [SerializeField]
+    private float score;
+    [SerializeField]
+    private float scoreDecrement = 1f;
+    [SerializeField]
+    private TextMeshProUGUI scoreText;
+    [SerializeField]
+    private TextMeshProUGUI deathText;
+    [SerializeField]
+    private Button restartGame;
+    [SerializeField]
+    private Button mainMenu;
+    [SerializeField]
+    private GameObject death;
 
     public static bool changeLevel = false;
     public static bool canMove = true;
     public static bool playerHasDied = false;
     public static bool sphereHasBeenDestroyed;
 
-    public static int hitPoints = 5;
+    public static int hitPoints = 3;
 
     public static Vector3 spawnLocation = Vector3.zero;
 
     private GameObject instantiatedPlayer;
     private GameObject sphere;
-    private float score;
     private string text;
+    private float initialScore;
     private int healthBarIndex = 0;
 
     private void Start()
@@ -51,6 +66,12 @@ public class GameManager : MonoBehaviour
         quit.onClick.AddListener(Quit);
         pauseMenu.enabled = false;
         pauseMenu.gameObject.SetActive(false);
+        initialScore = score;
+
+        mainMenu.onClick.AddListener(GoToMainMenu);
+        restartGame.onClick.AddListener(RestartGame);
+        death.SetActive(false);
+
     }
     private void Update()
     {
@@ -70,6 +91,40 @@ public class GameManager : MonoBehaviour
                 sphereHasBeenDestroyed = true;
             }
         }
+        ScoreUpdate();
+    }
+
+    private void GoToMainMenu()
+    {
+        Scene mainMenuScene = SceneManager.GetSceneByBuildIndex(0);
+        SceneManager.LoadScene(mainMenuScene.buildIndex);
+        Debug.Log("Move to main menu");
+        hitPoints = 3;
+        spawnLocation = Vector3.zero;
+        Time.timeScale = 1f;
+        death.SetActive(false);
+    }
+    private void RestartGame()
+    {
+        Scene level1 = SceneManager.GetSceneByBuildIndex(1);
+        SceneManager.LoadScene(level1.buildIndex);
+        Debug.Log("Restarting Game");
+
+        hitPoints = 3;
+        spawnLocation = Vector3.zero;
+        Time.timeScale = 1f;
+        death.SetActive(false);
+    }
+
+    private void ScoreUpdate()
+    {
+        // ensures that there isn't negative score
+        if (score < 0)
+            score = 0;
+        // make so that the scores cannot decrease than more than a 10th of the maximum possible score. 
+        if (score > initialScore / 10)
+            score -= scoreDecrement * Time.deltaTime;
+        scoreText.text = Mathf.Round(score).ToString();
     }
     private void PauseMenu()
     {
@@ -109,6 +164,7 @@ public class GameManager : MonoBehaviour
             canMove = true;
             instantiatedPlayer = Instantiate(player, spawnLocation, Quaternion.identity);
             playerHasDied = false;
+            score -= 200f;
         }
     }
 
@@ -131,7 +187,12 @@ public class GameManager : MonoBehaviour
             // the mesh renderer should be disabled
             instantiatedPlayer.GetComponent<MeshRenderer>().enabled = false;
             // there should be an UI that prompts the player to either restart or go to main menu
-
+            // when the player dies, there will be two buttons: restart & Main Menu
+            // exit will go back to scene 1.
+            deathText.text = "GAME OVER!";
+            death.SetActive(true);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
             Debug.Log("Game Over");
         }
     }
@@ -142,9 +203,9 @@ public class GameManager : MonoBehaviour
         {
             Scene currentScene = SceneManager.GetActiveScene();
             TextWriter scoreWriter = new StreamWriter("CurrentScore.txt", true);
-            scoreWriter.WriteLine(score);
+            scoreWriter.WriteLine(score.ToString());
             scoreWriter.Close();
-            if (currentScene.buildIndex == 2)
+            if (currentScene.buildIndex == 3)
             {
                 // we need to put some important information onto the text file
                 // name - [Score]
@@ -156,10 +217,11 @@ public class GameManager : MonoBehaviour
 
                 foreach (var line in scoreFile)
                 {
-                    score += Int32.Parse(line);
+                    Debug.Log(line);
+                    score += Mathf.Round(float.Parse(line));
                 }
 
-                text += "-" + score.ToString();
+                text += " - " + Mathf.Round(score).ToString();
                 tsw.WriteLine(text);
                 tsw.Close();
             }

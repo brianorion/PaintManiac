@@ -229,12 +229,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 527309f6a97e73d45958a3adcc9f74de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1.35
+  speed: 2
   rotationSensitivity: 3
   maximumCameraRotation: 360
   cam: {fileID: 3097854698080814330}
   itemPickUpDistance: 5
-  tearPickUpDistance: 2
   force: 3
   itemCollectionLocation: {fileID: 2357420009173453191}
 --- !u!54 &3097854698886837709
