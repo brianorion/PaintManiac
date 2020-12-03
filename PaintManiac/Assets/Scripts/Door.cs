@@ -5,16 +5,13 @@ using UnityEngine;
 public class Door : MonoBehaviour
 {
     [SerializeField]
-    private GameObject doorPlate;
-    [SerializeField]
     private Puzzle doorButtonPuzzle;
-    [SerializeField]
-    private float moveIncrementPerSec = 0.25f;
-    [SerializeField]
-    private float doorOffset = 2.5f;
-
-    private float doorStartPosition;
-    private float cumulativeHeight = 0f;
+    public GameObject doorPlate;
+    public float moveIncrementPerSec = 0.25f;
+    public float doorOffset = 2.5f;
+    [HideInInspector]
+    public float doorStartPosition;
+    public float cumulativeHeight = 0f;
 
     private void Start()
     {
@@ -25,7 +22,7 @@ public class Door : MonoBehaviour
         MoveDoor();
     }
 
-    private void MoveDoor()
+    public void MoveDoor()
     {
         // if the puzzle is finished
         if (doorButtonPuzzle.hasFinishedPuzzle)

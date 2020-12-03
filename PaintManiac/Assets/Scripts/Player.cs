@@ -22,6 +22,7 @@ public class Player : MonoBehaviour
     private Transform itemCollectionLocation;
     
     private Rigidbody rb;
+    private Rigidbody itemRB;
     private GameObject item;
     private JumpPuzzle jumpPuzzle;
     private bool hasJumped = true;
@@ -120,6 +121,20 @@ public class Player : MonoBehaviour
             //Debug.Log($"{hit.collider.tag} has been hit");
             item = hit.collider.gameObject;
             item.transform.SetParent(itemCollectionLocation);
+            itemRB = item.GetComponent<Rigidbody>();
+            if (itemRB != null)
+            {
+                itemRB.isKinematic = true;
+            }
+            Debug.Log(item.name);
+            // this part deals with the sticks puzzle
+            Stick stick = item.GetComponent<Stick>();
+            if (stick != null)
+            {
+                // call this function that changes the internal state of the sticks
+                stick.ChangeStickState();
+                stick = null;
+            }
         }
         else if (Input.GetMouseButtonUp(0))
         {
@@ -128,12 +143,18 @@ public class Player : MonoBehaviour
                 item.transform.parent = null;
                 item = null;
             }
+            if (itemRB != null)
+            {
+                itemRB.isKinematic = false;
+                itemRB = null;
+            }
         }
 
         if (item != null)
         {
             // if we have the smallbox selected that has the Jumpy script 
             jumpPuzzle = item.GetComponent<JumpPuzzle>();
+
             if (jumpPuzzle != null)
             {
                 obtainedJumpy = true;

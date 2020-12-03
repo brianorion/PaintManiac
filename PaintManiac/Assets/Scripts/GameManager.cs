@@ -1,7 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.IO;
+using System.Text;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,18 +18,22 @@ public class GameManager : MonoBehaviour
     public static bool changeLevel = false;
     public static bool canMove = true;
     public static bool playerHasDied = false;
+    public static bool sphereHasBeenDestroyed;
 
-    public static int score = 0;
     public static int hitPoints = 3;
 
     public static Vector3 spawnLocation = Vector3.zero;
 
     private GameObject instantiatedPlayer;
+    private GameObject sphere;
+    private float score;
+    private string text;
 
     private void Start()
     {
         // the player will always spawn at the origin of the world
         instantiatedPlayer = Instantiate(player, spawnLocation, Quaternion.identity);
+        sphere = GameObject.FindGameObjectWithTag("Sphere");
     }
     private void Update()
     {
@@ -35,9 +42,16 @@ public class GameManager : MonoBehaviour
         if (changeLevel)
         {                                                                                                                   
             ResetVariables();
-            StartCoroutine(ChangeScene());
+            ChangeScene();
         }
-
+        if (sphere != null)
+        {
+            if (sphere.transform.position.y < -200)
+            {
+                Destroy(sphere);
+                sphereHasBeenDestroyed = true;
+            }
+        }
     }
 
     private void PlayerUpdate()
@@ -69,6 +83,7 @@ public class GameManager : MonoBehaviour
         spawnLocation = Vector3.zero;
         hitPoints = 3;
         canMove = true;
+        sphereHasBeenDestroyed = false;
     }
 
     private void GameOver()
@@ -86,21 +101,31 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private IEnumerator ChangeScene()
+    private void ChangeScene()
     {
         if (changeLevel)
         {
             Scene currentScene = SceneManager.GetActiveScene();
-            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(currentScene.buildIndex + 1, LoadSceneMode.Single);
-
-            Debug.Log("I am changing scenes");
-
-            while (!asyncLoad.isDone)
+            if (currentScene.buildIndex == 2)
             {
-                yield return null;
+                // we need to put some important information onto the text file
+                // name - [Score]
+                StreamReader nameFile = new StreamReader("CurrentName.txt");
+                text += nameFile.ReadLine();
+
+                TextWriter tsw = new StreamWriter("Leaderboard.txt", true);
+                var scoreFile = File.ReadLines("CurrentScore.txt", Encoding.UTF8);
+
+                foreach (var line in scoreFile)
+                {
+                    score += Int32.Parse(line);
+                }
+
+                text += "-" + score.ToString();
+                tsw.WriteLine(text);
+                tsw.Close();
             }
-            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetSceneByBuildIndex(currentScene.buildIndex + 1));
-            SceneManager.UnloadSceneAsync(currentScene);
+            SceneManager.LoadScene(currentScene.buildIndex + 1);
             // we changed the level
             changeLevel = false;
         }

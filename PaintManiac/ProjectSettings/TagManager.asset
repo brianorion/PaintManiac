@@ -16,6 +16,7 @@ TagManager:
   - Box3
   - Box4
   - Sphere
+  - Stick
   layers:
   - Default
   - TransparentFX
