@@ -1,2 +1,2 @@
 # PaintManiac
-A paint puzzle game
+A simple puzzle game
