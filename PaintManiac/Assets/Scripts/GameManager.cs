@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
 using System.Text;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -14,13 +15,23 @@ public class GameManager : MonoBehaviour
     private float minimumDepthTillDeath = 100f;
     [SerializeField]
     private float timeTillDeath = 3f;
+    [SerializeField]
+    private List<Image> healthBarImages = new List<Image>();
+    [SerializeField]
+    private Image pauseMenu;
+    [SerializeField]
+    private Button resume;
+    [SerializeField]
+    private Button restartLevel;
+    [SerializeField]
+    private Button quit;
 
     public static bool changeLevel = false;
     public static bool canMove = true;
     public static bool playerHasDied = false;
     public static bool sphereHasBeenDestroyed;
 
-    public static int hitPoints = 3;
+    public static int hitPoints = 5;
 
     public static Vector3 spawnLocation = Vector3.zero;
 
@@ -28,15 +39,22 @@ public class GameManager : MonoBehaviour
     private GameObject sphere;
     private float score;
     private string text;
+    private int healthBarIndex = 0;
 
     private void Start()
     {
         // the player will always spawn at the origin of the world
         instantiatedPlayer = Instantiate(player, spawnLocation, Quaternion.identity);
         sphere = GameObject.FindGameObjectWithTag("Sphere");
+        resume.onClick.AddListener(Resume);
+        restartLevel.onClick.AddListener(Restart);
+        quit.onClick.AddListener(Quit);
+        pauseMenu.enabled = false;
+        pauseMenu.gameObject.SetActive(false);
     }
     private void Update()
     {
+        PauseMenu();
         PlayerUpdate();
         GameOver();
         if (changeLevel)
@@ -53,7 +71,22 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+    private void PauseMenu()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape) && !pauseMenu.enabled)
+        {
+            pauseMenu.enabled = true;
+            pauseMenu.gameObject.SetActive(true);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            Time.timeScale = 0f;
 
+        }
+        else if (Input.GetKeyDown(KeyCode.Escape) && pauseMenu.enabled)
+        {
+            Resume();
+        }
+    }
     private void PlayerUpdate()
     {
         // if the player has not been destroyed in any way, shape, or form
@@ -71,6 +104,8 @@ public class GameManager : MonoBehaviour
         else
         {
             hitPoints -= 1;
+            healthBarIndex++;
+            healthBarImages[healthBarIndex].enabled = true;
             canMove = true;
             instantiatedPlayer = Instantiate(player, spawnLocation, Quaternion.identity);
             playerHasDied = false;
@@ -106,6 +141,9 @@ public class GameManager : MonoBehaviour
         if (changeLevel)
         {
             Scene currentScene = SceneManager.GetActiveScene();
+            TextWriter scoreWriter = new StreamWriter("CurrentScore.txt", true);
+            scoreWriter.WriteLine(score);
+            scoreWriter.Close();
             if (currentScene.buildIndex == 2)
             {
                 // we need to put some important information onto the text file
@@ -129,5 +167,24 @@ public class GameManager : MonoBehaviour
             // we changed the level
             changeLevel = false;
         }
+    }
+
+    public void Resume()
+    {
+        Time.timeScale = 1f;
+        pauseMenu.enabled = false;
+        pauseMenu.gameObject.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+    public void Restart()
+    {
+        Destroy(instantiatedPlayer);
+        playerHasDied = true;
+        Resume();
+    }
+    public void Quit()
+    {
+        Application.Quit();
     }
 }

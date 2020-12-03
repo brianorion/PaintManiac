@@ -18,9 +18,15 @@ public class ScoreboardManager : MonoBehaviour
         // the scoreboard will only output the top 10 tries
         var enumLines = File.ReadLines("Leaderboard.txt", Encoding.UTF8);
 
+        // the leaderboard must be sorted first
+
         foreach (var line in enumLines)
         {
-            input.text += line + "\n";
+            // this prints out the top 10
+            if (index < 10)
+            {
+                input.text += line + "\n";
+            }
         }
     }
 }

@@ -46,3 +46,10 @@ MonoBehaviour:
   player: {fileID: 3097854698886837706, guid: 2dbfa8c8d97c5c84b999c21bdae9fdcb, type: 3}
   minimumDepthTillDeath: 100
   timeTillDeath: 3
+  healthBarImages:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
